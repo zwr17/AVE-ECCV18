@@ -1,5 +1,6 @@
 from __future__ import print_function
 import os
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "0" # set GPU ID
 import torch.nn as nn
 from torch.autograd import Variable
@@ -14,6 +15,7 @@ import imageio
 import cv2
 from sklearn.preprocessing import MinMaxScaler
 import warnings
+
 warnings.filterwarnings("ignore") 
 
 scaler = MinMaxScaler(copy=True, feature_range=(0, 1))
@@ -62,7 +64,8 @@ with h5py.File(dir_order_test, 'r') as hf:
     test_order = hf['order'][:]
 
 # pre-trained models
-att_model = torch.load('model/AV_att.pt')
+#att_model = torch.load('model/AV_att.pt')
+att_model = torch.load('model/AV_att.pt',map_location='cuda:0')
 att_layer = att_model._modules.get('affine_h') # extract attention maps from the layer
 
 
@@ -101,7 +104,8 @@ for num in range(len(test_order)):
     # extract video frames
     video_index = os.path.join(raw_video_dir, x[1] + '.mp4')
     vid = imageio.get_reader(video_index, 'ffmpeg')
-    vid_len = len(vid)
+    #vid_len = len(vid)
+    vid_len = vid.count_frames()
     frame_interval = int(vid_len / t)
   
     frame_num = video_frame_sample(frame_interval, t, sample_num)
